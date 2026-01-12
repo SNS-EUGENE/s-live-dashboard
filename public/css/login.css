@@ -1,0 +1,77 @@
+/* public/css/login.css */
+
+body {
+    background: #ECEFF1;
+    color: rgba(0,0,0,0.87);
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+#login-container {
+    background: white;
+    max-width: 380px;
+    width: 100%;
+    padding: 32px 24px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+#login-container h1 {
+    font-size: 24px;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+    margin: 0 0 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background: #667eea;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: white;
+    padding: 14px;
+    border-radius: 4px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background: #5a6cd9;
+}
+
+#error-message {
+    color: #dc2626;
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+    display: none;
+}

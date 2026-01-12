@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S-LIVE 스튜디오 통계</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stats-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, rgba(103, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .date-selector {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .date-input {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(103, 126, 234, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .usage-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .usage-table th,
+        .usage-table td {
+            padding: 1rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .usage-table th {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            font-weight: 700;
+            color: #374151;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .usage-table td {
+            font-weight: 600;
+        }
+
+        .usage-table .category-col {
+            text-align: left;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .usage-rate {
+            color: #059669;
+            font-weight: 700;
+        }
+
+        .chart-container {
+            padding: 2rem;
+            height: 400px;
+            position: relative;
+        }
+
+        .top-companies {
+            padding: 2rem;
+        }
+
+        .company-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .company-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .company-rank {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+            min-width: 2rem;
+        }
+
+        .company-name {
+            flex: 1;
+            font-weight: 600;
+            color: #1e293b;
+            margin-left: 1rem;
+        }
+
+        .company-purpose {
+            color: #7c3aed;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-left: 1rem;
+        }
+
+        .company-count {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .live-commerce-stats {
+            padding: 2rem;
+        }
+
+        .lc-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .lc-stat-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .lc-stat-title {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .lc-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #f59e0b;
+        }
+
+        .lc-stat-unit {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-left: 0.25rem;
+        }
+
+        .satisfaction-stats {
+            padding: 2rem;
+        }
+
+        .satisfaction-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .satisfaction-item {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .satisfaction-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 1rem;
+        }
+
+        .satisfaction-score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+        }
+
+        .satisfaction-total {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .top-count-selector {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(103, 126, 234, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .lc-stats-grid,
+            .satisfaction-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-selector {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">S-LIVE Studio</div>
+        <nav class="nav-tabs">
+            <a href="/main.html" class="nav-tab">📊 메인</a>
+            <a href="/dashboard.html" class="nav-tab">📅 대시보드</a>
+            <a href="/admin.html" class="nav-tab">⚙️ 관리자</a>
+            <a href="/statistics.html" class="nav-tab active">📈 통계</a>
+        </nav>
+        <div class="admin-actions">
+            <button class="btn btn-primary" id="refreshStatsBtn">
+                <span>🔄</span>
+                새로고침
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 1. 스튜디오 이용 현황 -->
+        <div class="stats-section">
+            <div class="section-header">
+                <h2 class="section-title">📊 1. 스튜디오 이용 현황</h2>
+                <div class="date-selector">
+                    <label for="statsMonth">통계 기간:</label>
+                    <input type="month" id="statsMonth" class="date-input">
+                    <button class="btn btn-sm btn-primary" id="updateStatsBtn">조회</button>
+                </div>
+            </div>
+            <div style="padding: 2rem;">
+                <div style="margin-bottom: 1rem; color: #64748b; font-size: 0.9rem;">
+                    운영기간: <span id="operationPeriod">2025.01.01 ~ 2025.01.31</span>
+                </div>
+                <table class="usage-table">
+                    <thead>
+                        <tr>
+                            <th>구분</th>
+                            <th>운영일</th>
+                            <th>이용량</th>
+                            <th>이용률</th>
+                            <th>비고</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usageTableBody">
+                        <tr><td colspan="5" class="loading">데이터를 불러오는 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. 이용률 비교 차트 -->
+        <div class="stats-section">
+            <div class="section-header">
+                <h2 class="section-title">📈 2. 이용률 비교</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="usageChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 3. 주요 스튜디오 이용 업체 -->
+        <div class="stats-section">
+            <div class="section-header">
+                <h2 class="section-title">🏢 3. 주요 스튜디오 이용 업체</h2>
+            </div>
+            <div class="top-companies">
+                <div class="control-row">
+                    <label for="topCount">표시 개수:</label>
+                    <select id="topCount" class="top-count-selector">
+                        <option value="5">상위 5개</option>
+                        <option value="10">상위 10개</option>
+                        <option value="15">상위 15개</option>
+                    </select>
+                </div>
+                <div class="company-list" id="topCompaniesList">
+                    <div class="loading">데이터를 불러오는 중...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 라이브커머스 통계 -->
+        <div class="stats-section">
+            <div class="section-header">
+                <h2 class="section-title">📺 4. 라이브커머스 통계</h2>
+            </div>
+            <div class="live-commerce-stats">
+                <div class="lc-stats-grid">
+                    <div class="lc-stat-card">
+                        <div class="lc-stat-title">총 시청자수</div>
+                        <div class="lc-stat-value" id="totalViewers">0<span class="lc-stat-unit">명</span></div>
+                    </div>
+                    <div class="lc-stat-card">
+                        <div class="lc-stat-title">총 매출액</div>
+                        <div class="lc-stat-value" id="totalRevenue">0<span class="lc-stat-unit">원</span></div>
+                    </div>
+                    <div class="lc-stat-card">
+                        <div class="lc-stat-title">1인당 매출액</div>
+                        <div class="lc-stat-value" id="avgRevenue">0<span class="lc-stat-unit">원</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 만족도 조사 결과 -->
+        <div class="stats-section">
+            <div class="section-header">
+                <h2 class="section-title">⭐ 5. 만족도 조사 결과</h2>
+            </div>
+            <div class="satisfaction-stats">
+                <div class="satisfaction-grid" id="satisfactionGrid">
+                    <div class="loading">데이터를 불러오는 중...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase 및 스크립트 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/statistics.js"></script>
+</body>
+</html>

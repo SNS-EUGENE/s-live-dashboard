@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S-LIVE 스튜디오 관리자</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">S-LIVE Studio</div>
+        <nav class="nav-tabs">
+            <a href="/main.html" class="nav-tab">📊 메인</a>
+            <a href="/dashboard.html" class="nav-tab">📅 대시보드</a>
+            <a href="/admin.html" class="nav-tab active">⚙️ 관리자</a>
+            <a href="/statistics.html" class="nav-tab">📈 통계</a>
+        </nav>
+        <div class="admin-actions">
+            <button class="btn btn-primary" id="refreshBtn">
+                <span>🔄</span>
+                새로고침
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">오늘 예약</div>
+                <div class="stat-number stat-today" id="todayCount">0<span style="font-size: 0.8rem; color: #64748b; margin-left: 0.25rem;">건</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">이번주 예약</div>
+                <div class="stat-number stat-week" id="weekCount">0<span style="font-size: 0.8rem; color: #64748b; margin-left: 0.25rem;">건</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">총 업체수</div>
+                <div class="stat-number stat-companies" id="companyCount">0<span style="font-size: 0.8rem; color: #64748b; margin-left: 0.25rem;">개</span></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">설문 완료율</div>
+                <div class="stat-number stat-total" id="surveyRate">0<span style="font-size: 0.8rem; color: #64748b; margin-left: 0.25rem;">%</span></div>
+            </div>
+        </div>
+
+        <div class="main-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-title">예약 관리</div>
+                    <div style="color: #64748b; font-size: 0.9rem; margin-top: 0.5rem;">
+                        스튜디오 예약을 추가, 수정, 삭제하고 만족도 설문조사를 관리할 수 있습니다
+                    </div>
+                </div>
+                <div class="search-controls">
+                    <div class="search-row">
+                        <input type="text" class="search-input" id="searchInput" placeholder="🔍 업체명 또는 제품명">
+                        <select class="filter-select" id="studioFilter">
+                            <option value="">스튜디오 전체</option>
+                            <option value="스튜디오 메인">스튜디오 메인</option>
+                            <option value="스튜디오 소형">스튜디오 소형</option>
+                            <option value="스튜디오 키친">스튜디오 키친</option>
+                        </select>
+                        <select class="filter-select" id="statusFilter">
+                            <option value="">상태 전체</option>
+                            <option value="active">이용 중</option>
+                            <option value="upcoming">예정</option>
+                            <option value="completed">이용 완료</option>
+                        </select>
+                        <select class="filter-select" id="surveyFilter">
+                            <option value="">설문 전체</option>
+                            <option value="completed">설문 완료</option>
+                            <option value="pending">설문 대기</option>
+                        </select>
+                        <!-- 🔥 날짜 필터 - 스위치 버튼 + 동적 UI -->
+                        <div class="date-filter-container">
+                            <div class="date-mode-switch">
+                                <button type="button" class="date-mode-btn active" id="singleDateMode">📅 단일</button>
+                                <button type="button" class="date-mode-btn" id="rangeMode">📅 기간</button>
+                            </div>
+                            <div class="date-inputs">
+                                <!-- 단일 날짜 모드 -->
+                                <div class="date-input-group single-date" id="singleDateGroup">
+                                    <input type="date" class="search-input date-input" id="singleDate">
+                                </div>
+                                
+                                <!-- 기간 모드 -->
+                                <div class="date-input-group range-date" id="rangeDateGroup" style="display: none;">
+                                    <input type="date" class="search-input date-input" id="startDate" placeholder="시작일">
+                                    <span class="date-separator">~</span>
+                                    <input type="date" class="search-input date-input" id="endDate" placeholder="종료일">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="search-row">
+                        <button class="btn btn-success" id="exportBtn">
+                            <span>📊</span>
+                            내보내기
+                        </button>
+                        <button class="btn btn-secondary" id="importBtn">
+                            <span>📁</span>
+                            가져오기
+                        </button>
+                        <button class="btn btn-primary" id="addScheduleBtn">
+                            <span>➕</span>
+                            예약 추가
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="schedules-table-container">
+                <table class="schedules-table" id="schedulesTable">
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>스튜디오</th>
+                            <th>업체명</th>
+                            <th>시간</th>
+                            <th>제품명</th>
+                            <th>상태</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="schedulesTableBody">
+                        <tr>
+                            <td colspan="7">
+                                <div class="loading">데이터를 불러오는 중...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 예약 추가/수정 모달 -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">새 예약 추가</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+
+            <form id="scheduleForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="modalDate">날짜 *</label>
+                        <input type="date" class="form-input" id="modalDate" required>
+                    </div>
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="modalStudio">스튜디오 *</label>
+                        <select class="form-select" id="modalStudio" required>
+                            <option value="">스튜디오 선택</option>
+                            <option value="스튜디오 메인">스튜디오 메인</option>
+                            <option value="스튜디오 소형">스튜디오 소형</option>
+                            <option value="스튜디오 키친">스튜디오 키친</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="modalCompany">업체명 *</label>
+                        <input type="text" class="form-input" id="modalCompany" required placeholder="업체명을 입력하세요">
+                    </div>
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="modalStart">시작 시간 *</label>
+                        <select class="form-select" id="modalStart" required>
+                            <option value="">시작 시간</option>
+                            <option value="09">09:00</option><option value="10">10:00</option><option value="11">11:00</option>
+                            <option value="12">12:00</option><option value="13">13:00</option><option value="14">14:00</option>
+                            <option value="15">15:00</option><option value="16">16:00</option><option value="17">17:00</option>
+                            <option value="18">18:00</option><option value="19">19:00</option><option value="20">20:00</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="modalEnd">종료 시간 *</label>
+                        <select class="form-select" id="modalEnd" required>
+                            <option value="">종료 시간</option>
+                            <option value="10">10:00</option><option value="11">11:00</option><option value="12">12:00</option>
+                            <option value="13">13:00</option><option value="14">14:00</option><option value="15">15:00</option>
+                            <option value="16">16:00</option><option value="17">17:00</option><option value="18">18:00</option>
+                            <option value="19">19:00</option><option value="20">20:00</option><option value="21">21:00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="modalPurpose">이용 목적 *</label>
+                        <select class="form-select" id="modalPurpose" required>
+                            <option value="">이용 목적 선택</option>
+                            <option value="일반">일반</option>
+                            <option value="라이브커머스">라이브커머스</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="modalProduct">제품명 *</label>
+                        <input type="text" class="form-input" id="modalProduct" required placeholder="촬영할 제품명을 입력하세요">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">취소</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 설문조사 모달 -->
+    <div id="surveyModal" class="modal">
+        <div class="modal-content" style="display: flex; flex-direction: column; height: 85vh; max-height: 600px;">
+            <div class="modal-header" style="flex-shrink: 0;">
+                <h3 class="modal-title">📝 만족도 설문조사</h3>
+                <button class="close-btn" id="closeSurveyModalBtn">&times;</button>
+            </div>
+            <div class="survey-info-box" style="flex-shrink: 0;">
+                <div class="survey-info-title" id="surveyScheduleInfo">예약 정보</div>
+                <div class="survey-info-details" id="surveyScheduleDetails">날짜, 업체명, 스튜디오 정보가 표시됩니다</div>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding-right: 0.5rem; margin: 0 -0.5rem;">
+                <form id="surveyForm">
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label" for="facilityRating">시설 만족도 *</label>
+                            <select class="form-select" id="facilityRating" required>
+                                <option value="">선택하세요</option>
+                                <option value="매우 만족">매우 만족</option><option value="만족">만족</option><option value="보통">보통</option><option value="불만족">불만족</option><option value="매우 불만족">매우 불만족</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="staffKindness">직원 친절도 *</label>
+                            <select class="form-select" id="staffKindness" required>
+                                <option value="">선택하세요</option>
+                                <option value="매우 만족">매우 만족</option><option value="만족">만족</option><option value="보통">보통</option><option value="불만족">불만족</option><option value="매우 불만족">매우 불만족</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="equipmentExpertise">장비 전문성 *</label>
+                            <select class="form-select" id="equipmentExpertise" required>
+                                <option value="">선택하세요</option>
+                                <option value="매우 만족">매우 만족</option><option value="만족">만족</option><option value="보통">보통</option><option value="불만족">불만족</option><option value="매우 불만족">매우 불만족</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row form-row-3">
+                        <div class="form-group">
+                            <label class="form-label" for="reservationSatisfaction">예약 만족도 *</label>
+                            <select class="form-select" id="reservationSatisfaction" required>
+                                <option value="">선택하세요</option>
+                                <option value="매우 만족">매우 만족</option><option value="만족">만족</option><option value="보통">보통</option><option value="불만족">불만족</option><option value="매우 불만족">매우 불만족</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="cleanliness">청결 상태 *</label>
+                            <select class="form-select" id="cleanliness" required>
+                                <option value="">선택하세요</option>
+                                <option value="매우 만족">매우 만족</option><option value="만족">만족</option><option value="보통">보통</option><option value="불만족">불만족</option><option value="매우 불만족">매우 불만족</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="equipmentSatisfaction">비품 만족도 *</label>
+                            <select class="form-select" id="equipmentSatisfaction" required>
+                                <option value="">선택하세요</option>
+                                <option value="매우 만족">매우 만족</option><option value="만족">만족</option><option value="보통">보통</option><option value="불만족">불만족</option><option value="매우 불만족">매우 불만족</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label" for="discoveryPath">스튜디오 발견 경로</label>
+                            <select class="form-select" id="discoveryPath">
+                                <option value="">선택하세요</option><option value="SNS">SNS</option><option value="옥외광고">옥외광고</option><option value="지인 소개">지인 소개</option><option value="공공서비스 예약시스템">공공서비스 예약시스템</option><option value="기타">기타</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="studioBenefits">스튜디오 이용 이점</label>
+                            <select class="form-select" id="studioBenefits">
+                                <option value="">선택하세요</option><option value="판매 증진">판매 증진</option><option value="제품 홍보">제품 홍보</option><option value="인지도 상승">인지도 상승</option><option value="비용 절감">비용 절감</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row form-row-2">
+                        <div class="form-group">
+                            <label class="form-label" for="revenue">매출액 (원) <span class="live-commerce-only">*라이브커머스 전용</span></label>
+                            <input type="text" class="form-input" id="revenue">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="viewerCount">시청자 수 (명) <span class="live-commerce-only">*라이브커머스 전용</span></label>
+                            <input type="text" class="form-input" id="viewerCount">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="feedback">기타 의견</label>
+                            <textarea class="form-input" id="feedback" rows="3" placeholder="개선사항이나 추가 의견을 자유롭게 작성해주세요"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-actions" style="flex-shrink: 0; margin-top: 1rem;">
+                <button type="button" class="btn btn-danger" id="deleteSurveyBtn">🗑️ 설문 삭제</button>
+                <button type="button" class="btn btn-secondary" id="cancelSurveyBtn">취소</button>
+                <button type="submit" class="btn btn-success" id="saveSurveyBtn" form="surveyForm">설문 완료</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 중복 처리 모달 -->
+    <div id="conflictModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="conflictModalTitle">🔄 중복 예약 발견</h3>
+            </div>
+            <div id="conflictInfo" style="margin-bottom: 1rem; text-align: center; color: #475569;">
+                <p><strong id="conflictCompany"></strong>의 <strong id="conflictDate"></strong> 예약이 중복되었습니다.</p>
+                <p>어떻게 처리하시겠습니까?</p>
+            </div>
+            <div class="conflict-container">
+                <div class="conflict-data-box">
+                    <h4>📊 기존 데이터</h4>
+                    <div id="existingScheduleInfo"></div>
+                </div>
+                <div class="conflict-data-box">
+                    <h4>📥 새로운 데이터</h4>
+                    <div id="newScheduleInfo"></div>
+                </div>
+            </div>
+            <div class="conflict-options">
+                 <div class="conflict-apply-all">
+                    <input type="checkbox" id="applyToAllConflicts" style="width: 16px; height: 16px;">
+                    <label for="applyToAllConflicts">☑️ 이 선택을 다음 모든 중복에 적용</label>
+                </div>
+                <div class="conflict-buttons">
+                    <button id="overwriteBtn" class="btn btn-danger">
+                        <span>⚠️</span>덮어쓰기
+                    </button>
+                    <button id="mergeBtn" class="btn btn-primary">
+                        <span>🤝</span>병합
+                    </button>
+                    <button id="skipBtn" class="btn btn-secondary">
+                        <span>➡️</span>건너뛰기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase 및 스크립트 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회사 데이터 변환기</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #1a1d29;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            background: rgba(103, 126, 234, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.05);
+        }
+
+        .upload-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(103, 126, 234, 0.6);
+        }
+
+        .preview-section {
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .preview-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+
+        .data-preview {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 600px;
+            overflow: auto;
+            border: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+        }
+
+        .data-preview table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-preview th {
+            position: sticky;
+            top: 0;
+            background: #f1f5f9;
+            z-index: 10;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .data-preview td {
+            white-space: nowrap;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.8rem;
+        }
+
+        .data-preview td:hover {
+            background: #e0f2fe;
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: none;
+        }
+
+        .result-section {
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .converted-data {
+            background: #f0f9ff;
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #0ea5e9;
+            white-space: pre-wrap;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .status {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        .download-section, .upload-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(240, 249, 255, 0.5);
+            border-radius: 12px;
+            border: 1px solid #0ea5e9;
+        }
+
+        .download-controls, .upload-controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🏢 통합 데이터 변환기</h1>
+        
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" class="upload-input" accept=".xlsx,.xls,.csv">
+            <div style="margin-bottom: 1rem; font-size: 3rem;">📁</div>
+            <p style="margin: 0; color: #64748b;">파일을 클릭하여 업로드하세요</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #94a3b8;">
+                <strong>회사 데이터:</strong> A열: 회사명, B열: 사업자등록번호, C열: 담당자명, D열: 서울소재여부<br>
+                <strong>스튜디오 대관 데이터:</strong> CSV 파일 (대관목록_만족도_병합본 형식)
+            </p>
+        </div>
+
+        <div class="file-type-section" id="fileTypeSection" style="display: none;">
+            <h3 class="preview-title">📂 파일 타입 선택</h3>
+            <div style="display: flex; gap: 1rem; justify-content: center; margin: 1rem 0;">
+                <button class="btn btn-primary" onclick="processAsCompanyData()">🏢 회사 데이터로 처리</button>
+                <button class="btn btn-primary" onclick="processAsReservationData()">🎬 스튜디오 대관 데이터로 처리</button>
+            </div>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <h3 class="preview-title">📊 원본 데이터 미리보기</h3>
+            <div class="stats" id="statsContainer"></div>
+            <div class="data-preview" id="dataPreview"></div>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <h3 class="preview-title">🔄 변환된 데이터</h3>
+            <div class="converted-data" id="convertedData"></div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-success" onclick="downloadJSON()">📥 JSON 파일 다운로드</button>
+                <button class="btn btn-primary" onclick="copyToClipboard()">📋 클립보드에 복사</button>
+                <button class="btn btn-primary" onclick="uploadToFirestore()">🔥 Firestore에 업로드</button>
+                <button class="btn btn-primary" onclick="downloadFromFirestore()">📥 Firestore에서 다운로드</button>
+            </div>
+        </div>
+
+        <div class="download-section" id="downloadSection" style="display: none;">
+            <h3 class="preview-title">📥 Firestore 데이터 다운로드</h3>
+            <div class="download-controls">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">다운로드 형식</label>
+                        <select id="downloadFormat" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                            <option value="withId">문서 ID 포함</option>
+                            <option value="withoutId">문서 ID 제외</option>
+                            <option value="idOnly">문서 ID만</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">파일 형식</label>
+                        <select id="fileFormat" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                            <option value="json">JSON 파일</option>
+                            <option value="excel">Excel 파일 (.xlsx)</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">데이터 형식</label>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">필터링</label>
+                        <select id="downloadFilter" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                            <option value="all">전체 데이터</option>
+                            <option value="seoul">서울 소재만</option>
+                            <option value="nonSeoul">서울 외 지역만</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="download-progress" id="downloadProgress" style="display: none;">
+                    <div style="background: #e2e8f0; border-radius: 8px; height: 20px; margin: 1rem 0;">
+                        <div id="downloadProgressBar" style="background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); height: 100%; border-radius: 8px; width: 0%; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div id="downloadProgressText" style="text-align: center; color: #64748b;">준비 중...</div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn btn-success" onclick="startDownload()" id="startDownloadBtn">🚀 다운로드 시작</button>
+                    <button class="btn btn-danger" onclick="cancelDownload()" id="cancelDownloadBtn" style="display: none;">⏹️ 취소</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="upload-section" id="uploadSection" style="display: none;">
+            <h3 class="preview-title">🔥 Firestore 업로드</h3>
+            <div class="upload-controls">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">업로드 방식</label>
+                        <select id="uploadMode" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                            <option value="new">새로 추가 (기존 데이터 유지)</option>
+                            <option value="replace">전체 교체 (기존 데이터 삭제 후 추가)</option>
+                            <option value="merge">병합 (중복 시 업데이트)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">배치 크기</label>
+                        <select id="batchSize" style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px;">
+                            <option value="50">50개씩</option>
+                            <option value="100" selected>100개씩</option>
+                            <option value="200">200개씩</option>
+                            <option value="500">500개씩</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div style="background: #e2e8f0; border-radius: 8px; height: 20px; margin: 1rem 0;">
+                        <div id="progressBar" style="background: linear-gradient(135deg, #10b981 0%, #34d399 100%); height: 100%; border-radius: 8px; width: 0%; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div id="progressText" style="text-align: center; color: #64748b;">준비 중...</div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn btn-success" onclick="startUpload()" id="startUploadBtn">🚀 업로드 시작</button>
+                    <button class="btn btn-danger" onclick="cancelUpload()" id="cancelUploadBtn" style="display: none;">⏹️ 취소</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="statusMessage"></div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <script>
+        // Papa Parse 임포트 (전역으로 사용)
+        const Papa = window.Papa || {
+            parse: function(input, config) {
+                // 개선된 CSV 파서 - 따옴표 처리 포함
+                const lines = input.split('\n').filter(line => line.trim());
+                const headers = this.parseCSVLine(lines[0]);
+                const data = lines.slice(1).map(line => {
+                    const values = this.parseCSVLine(line);
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        let value = values[index] || '';
+                        
+                        // 동적 타입 변환
+                        if (config.dynamicTyping && value !== '') {
+                            // Boolean 변환 먼저
+                            if (value === 'TRUE' || value === 'true') {
+                                value = true;
+                            } else if (value === 'FALSE' || value === 'false') {
+                                value = false;
+                            } else if (!isNaN(value) && value.trim() !== '') {
+                                // 숫자 변환
+                                value = parseFloat(value);
+                            }
+                        }
+                        row[header.trim()] = value;
+                    });
+                    return row;
+                });
+                return { data, meta: { fields: headers.map(h => h.trim()) } };
+            },
+            
+            parseCSVLine: function(line) {
+                const result = [];
+                let current = '';
+                let inQuotes = false;
+                let i = 0;
+                
+                while (i < line.length) {
+                    const char = line[i];
+                    const nextChar = line[i + 1];
+                    
+                    if (char === '"') {
+                        if (inQuotes && nextChar === '"') {
+                            // 이스케이프된 따옴표
+                            current += '"';
+                            i += 2;
+                        } else {
+                            // 따옴표 시작/끝
+                            inQuotes = !inQuotes;
+                            i++;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        // 쉼표로 구분 (따옴표 밖에서만)
+                        result.push(current.trim());
+                        current = '';
+                        i++;
+                    } else {
+                        current += char;
+                        i++;
+                    }
+                }
+                
+                // 마지막 필드 추가
+                result.push(current.trim());
+                return result;
+            }
+        };
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyBW245Dx4vvPJ_DGCDGN3p-hu70gjuKTd4",
+            authDomain: "fir-live-dashboard.firebaseapp.com",
+            projectId: "fir-live-dashboard",
+            storageBucket: "fir-live-dashboard.appspot.com",
+            messagingSenderId: "259309810096",
+            appId: "1:259309810096:web:70b39a71d6cdae61aae675"
+        };
+        
+        // Firebase 초기화
+        let db = null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+        } catch (error) {
+            console.error('Firebase 초기화 오류:', error);
+        }
+
+        let convertedCompanies = [];
+        let convertedReservations = [];
+        let originalData = [];
+        let uploadCancelled = false;
+        let downloadCancelled = false;
+        let deleteCancelled = false;
+        let currentFileType = null;
+
+        document.getElementById('fileInput').addEventListener('change', handleFile);
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    if (file.name.toLowerCase().endsWith('.csv')) {
+                        // CSV 파일 처리
+                        const csvContent = e.target.result;
+                        originalData = Papa.parse(csvContent, {
+                            header: true,
+                            dynamicTyping: true,
+                            skipEmptyLines: true
+                        }).data;
+                        
+                        // CSV는 스튜디오 대관 데이터로 간주
+                        currentFileType = 'reservation';
+                        showPreview(originalData, 'reservation');
+                        convertReservationData(originalData);
+                        
+                    } else {
+                        // 엑셀 파일 처리
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        
+                        if (jsonData.length < 2) {
+                            showStatus('파일에 데이터가 충분하지 않습니다.', 'error');
+                            return;
+                        }
+
+                        originalData = jsonData.slice(1); // 헤더 제외
+                        
+                        // 엑셀 파일은 타입 선택 필요
+                        document.getElementById('fileTypeSection').style.display = 'block';
+                    }
+                    
+                } catch (error) {
+                    console.error('파일 처리 오류:', error);
+                    showStatus('파일을 처리하는 중 오류가 발생했습니다: ' + error.message, 'error');
+                }
+            };
+            
+            if (file.name.toLowerCase().endsWith('.csv')) {
+                reader.readAsText(file, 'utf-8');
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function processAsCompanyData() {
+            currentFileType = 'company';
+            document.getElementById('fileTypeSection').style.display = 'none';
+            showPreview(originalData, 'company');
+            convertCompanyData(originalData);
+        }
+
+        function processAsReservationData() {
+            currentFileType = 'reservation';
+            document.getElementById('fileTypeSection').style.display = 'none';
+            showPreview(originalData, 'reservation');
+            convertReservationData(originalData);
+        }
+
+        function showPreview(data, type = 'company') {
+            const previewSection = document.getElementById('previewSection');
+            const dataPreview = document.getElementById('dataPreview');
+            const statsContainer = document.getElementById('statsContainer');
+            let previewHTML = '';
+            
+            if (type === 'company') {
+                // 기존 회사 데이터 미리보기
+                const totalRows = data.length;
+                const uniqueCompanies = new Set(data.map(row => row[0])).size;
+                const seoulCompanies = data.filter(row => row[3] === '서울' || row[3] === 'Y' || row[3] === true).length;
+                
+                statsContainer.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${totalRows}</div>
+                        <div class="stat-label">총 행 수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${uniqueCompanies}</div>
+                        <div class="stat-label">고유 회사 수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${seoulCompanies}</div>
+                        <div class="stat-label">서울 소재 회사</div>
+                    </div>
+                `;
+                
+                const previewData = data.slice(0, 10);
+                previewHTML = `
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9;">
+                                <th style="padding: 0.5rem; border: 1px solid #e2e8f0;">회사명</th>
+                                <th style="padding: 0.5rem; border: 1px solid #e2e8f0;">사업자등록번호</th>
+                                <th style="padding: 0.5rem; border: 1px solid #e2e8f0;">담당자명</th>
+                                <th style="padding: 0.5rem; border: 1px solid #e2e8f0;">서울소재여부</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                previewData.forEach(row => {
+                    previewHTML += `
+                        <tr>
+                            <td style="padding: 0.5rem; border: 1px solid #e2e8f0;">${row[0] || ''}</td>
+                            <td style="padding: 0.5rem; border: 1px solid #e2e8f0;">${row[1] || ''}</td>
+                            <td style="padding: 0.5rem; border: 1px solid #e2e8f0;">${row[2] || ''}</td>
+                            <td style="padding: 0.5rem; border: 1px solid #e2e8f0;">${row[3] || ''}</td>
+                        </tr>
+                    `;
+                });
+                
+                previewHTML += '</tbody></table>';
+                if (data.length > 10) {
+                    previewHTML += `<p style="text-align: center; margin-top: 1rem; color: #64748b;">... 외 ${data.length - 10}개 행</p>`;
+                }
+                
+            } else {
+                // 스튜디오 대관 데이터 미리보기
+                const totalRows = data.length;
+                const uniqueCompanies = new Set(data.map(row => row.company)).size;
+                const reservationsWithSurvey = data.filter(row => row.facilityRating).length;
+                const avgSatisfaction = reservationsWithSurvey > 0 ? 
+                    (data.filter(row => row.facilityRating === '매우 만족').length / reservationsWithSurvey * 100).toFixed(1) : 0;
+                
+                statsContainer.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${totalRows}</div>
+                        <div class="stat-label">총 대관 건수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${uniqueCompanies}</div>
+                        <div class="stat-label">고유 회사 수</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${avgSatisfaction}%</div>
+                        <div class="stat-label">매우 만족 비율</div>
+                    </div>
+                `;
+                
+                // 스튜디오 대관 데이터는 30행까지 + 모든 컬럼 표시
+                const previewData = data.slice(0, 30);
+                
+                // 첫 번째 행에서 모든 컬럼명 추출
+                const allColumns = data.length > 0 ? Object.keys(data[0]) : [];
+                
+                previewHTML = `
+                    <div style="margin-bottom: 1rem; padding: 0.75rem; background: #dbeafe; border-radius: 8px; border: 1px solid #3b82f6;">
+                        <p style="margin: 0; color: #1e40af; font-weight: 600;">📊 전체 ${allColumns.length}개 컬럼 미리보기 (최대 30행)</p>
+                        <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #1e40af;">
+                            💡 <strong>사용법:</strong> 셀에 마우스를 올리면 전체 내용을 볼 수 있습니다
+                        </p>
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9;">
+                `;
+                
+                // 모든 컬럼 헤더 생성
+                allColumns.forEach(column => {
+                    previewHTML += `<th style="padding: 0.5rem; border: 1px solid #e2e8f0; font-size: 0.8rem; white-space: nowrap;">${column}</th>`;
+                });
+                
+                previewHTML += `
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                previewData.forEach((row, index) => {
+                    previewHTML += `<tr style="${index % 2 === 0 ? 'background: #f9fafb;' : ''}">`;
+                    
+                    allColumns.forEach(column => {
+                        const value = row[column];
+                        let displayValue = '';
+                        
+                        if (value === null || value === undefined) {
+                            displayValue = '<span style="color: #9ca3af; font-style: italic;">null</span>';
+                        } else if (value === '') {
+                            displayValue = '<span style="color: #9ca3af; font-style: italic;">빈값</span>';
+                        } else if (typeof value === 'boolean') {
+                            displayValue = `<span style="color: ${value ? '#059669' : '#dc2626'}; font-weight: 600;">${value}</span>`;
+                        } else if (typeof value === 'number') {
+                            displayValue = `<span style="color: #0ea5e9; font-weight: 600;">${value}</span>`;
+                        } else {
+                            displayValue = String(value);
+                        }
+                        
+                        previewHTML += `
+                            <td style="padding: 0.5rem; border: 1px solid #e2e8f0; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
+                                title="${String(value || '').replace(/"/g, '&quot;')}">${displayValue}</td>
+                        `;
+                    });
+                    
+                    previewHTML += '</tr>';
+                });
+                
+                previewHTML += '</tbody></table>';
+                
+                if (data.length > 30) {
+                    previewHTML += `
+                        <div style="text-align: center; margin-top: 1rem; padding: 0.75rem; background: #f3f4f6; border-radius: 8px;">
+                            <span style="color: #64748b; font-weight: 600;">... 외 ${data.length - 30}개 행</span>
+                            <span style="color: #64748b; margin-left: 1rem;">(총 ${data.length}개 행, ${allColumns.length}개 컬럼)</span>
+                        </div>
+                    `;
+                }
+            }
+            
+            dataPreview.innerHTML = previewHTML;
+            previewSection.style.display = 'block';
+        }
+
+        function convertCompanyData(data) {
+            const companyMap = new Map();
+            
+            data.forEach(row => {
+                const companyName = row[0];
+                const companyRegNum = row[1];
+                const personName = row[2];
+                const isSeoulRaw = row[3];
+                
+                if (!companyName || !companyRegNum) return;
+                
+                // 서울 소재 여부 판단
+                const isSeoul = isSeoulRaw === '서울' || isSeoulRaw === 'Y' || isSeoulRaw === true || isSeoulRaw === '1';
+                
+                const key = `${companyName}_${companyRegNum}`;
+                
+                if (companyMap.has(key)) {
+                    // 기존 회사에 담당자 추가
+                    const existingCompany = companyMap.get(key);
+                    if (personName && !existingCompany.companyPerson.includes(personName)) {
+                        existingCompany.companyPerson.push(personName);
+                    }
+                } else {
+                    // 새 회사 추가
+                    companyMap.set(key, {
+                        companyName: companyName,
+                        companyRegNum: companyRegNum.toString(),
+                        companyPerson: personName ? [personName] : [],
+                        isSeoul: isSeoul
+                    });
+                }
+            });
+            
+            convertedCompanies = Array.from(companyMap.values());
+            showConvertedData();
+            showStatus(`총 ${convertedCompanies.length}개 회사 데이터가 변환되었습니다.`, 'success');
+        }
+
+        function convertReservationData(data) {
+            convertedReservations = [];
+            
+            data.forEach((row, index) => {
+                // 기본 정보
+                const reservationData = {
+                    purpose: row.purpose,
+                    date: row.date,
+                    noShow: row.noShow,
+                    liveTime: row.liveTime,
+                    start: row.start,
+                    end: row.end,
+                    studio: row.studio,
+                    companyType: row.companyType,
+                    product: row.product,
+                    productCount: row.productCount,
+                    category: row.category,
+                    host: row.host,
+                    channel: row.channel
+                };
+
+                // company 정보 처리 (단순하게!)
+                if (row.companyID) {
+                    // companyID가 있으면 reference ID만 저장
+                    reservationData.companyRef = row.companyID;
+                    reservationData.company = row.company; // 기존 호환성을 위해 회사명만 저장
+                } else {
+                    // companyID가 없으면 새 회사 문서 생성 필요
+                    const newCompanyId = `new_company_${Date.now()}_${index}`;
+                    reservationData.companyRef = newCompanyId;
+                    reservationData.company = row.company;
+                    
+                    // 새 회사 문서 생성을 위한 데이터
+                    reservationData.newCompany = {
+                        companyName: row.company,
+                        companyRegNum: null,
+                        companyPerson: [],
+                        isSeoul: null
+                    };
+                }
+
+                // equipment 맵
+                reservationData.equipment = {
+                    camera: row.camera || 0,
+                    mic: row.mic || 0,
+                    reel: row.reel || 0,
+                    hdmi: row.hdmi || 0,
+                    light: row.light || 0,
+                    switcher: row.switcher || 0,
+                    divider: row.divider || 0,
+                    capturecard: row.capturecard || 0
+                };
+
+                // survey 맵
+                reservationData.survey = {
+                    facilityRating: row.facilityRating,
+                    staffKindness: row.staffKindness,
+                    equipmentExpertise: row.equipmentExpertise,
+                    reservationSatisfaction: row.reservationSatisfaction,
+                    cleanliness: row.cleanliness,
+                    equipmentSatisfaction: row.equipmentSatisfaction,
+                    discoveryPath: row.discoveryPath,
+                    studioBenefits: row.studioBenefits,
+                    feedback: row.feedback,
+                    revenue: row.revenue,
+                    viewerCount: row.viewerCount
+                };
+
+                convertedReservations.push(reservationData);
+            });
+            
+            showConvertedData();
+            showStatus(`총 ${convertedReservations.length}개 대관 데이터가 변환되었습니다.`, 'success');
+        }
+
+        function showConvertedData() {
+            const resultSection = document.getElementById('resultSection');
+            const convertedData = document.getElementById('convertedData');
+            
+            if (currentFileType === 'company') {
+                convertedData.textContent = JSON.stringify(convertedCompanies, null, 2);
+            } else {
+                convertedData.textContent = JSON.stringify(convertedReservations, null, 2);
+            }
+            
+            resultSection.style.display = 'block';
+        }
+
+        function downloadJSON() {
+            if (currentFileType === 'company') {
+                const dataStr = JSON.stringify(convertedCompanies, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `companies_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                URL.revokeObjectURL(link.href);
+                showStatus('회사 데이터 JSON 파일이 다운로드되었습니다.', 'success');
+            } else {
+                const dataStr = JSON.stringify(convertedReservations, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(dataBlob);
+                link.download = `reservations_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                URL.revokeObjectURL(link.href);
+                showStatus('스튜디오 대관 데이터 JSON 파일이 다운로드되었습니다.', 'success');
+            }
+        }
+
+        function copyToClipboard() {
+            let dataStr;
+            if (currentFileType === 'company') {
+                dataStr = JSON.stringify(convertedCompanies, null, 2);
+            } else {
+                dataStr = JSON.stringify(convertedReservations, null, 2);
+            }
+            
+            navigator.clipboard.writeText(dataStr).then(() => {
+                showStatus('클립보드에 복사되었습니다.', 'success');
+            }).catch(err => {
+                showStatus('클립보드 복사에 실패했습니다.', 'error');
+            });
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `<div class="status status-${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Firestore 업로드 관련 함수들
+        function uploadToFirestore() {
+            if (!db) {
+                showStatus('Firebase가 설정되지 않았습니다. Firebase 설정을 확인해주세요.', 'error');
+                return;
+            }
+            
+            if (currentFileType === 'company' && convertedCompanies.length === 0) {
+                showStatus('업로드할 회사 데이터가 없습니다.', 'error');
+                return;
+            }
+            
+            if (currentFileType === 'reservation' && convertedReservations.length === 0) {
+                showStatus('업로드할 대관 데이터가 없습니다.', 'error');
+                return;
+            }
+            
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('uploadSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function startUpload() {
+            if (!db) {
+                showStatus('Firebase가 설정되지 않았습니다.', 'error');
+                return;
+            }
+
+            const uploadMode = document.getElementById('uploadMode').value;
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            
+            uploadCancelled = false;
+            showUploadProgress(true);
+            
+            try {
+                if (currentFileType === 'company') {
+                    if (uploadMode === 'replace') {
+                        await clearCollection('company');
+                    }
+                    await uploadCompanyInBatches(uploadMode, batchSize);
+                    
+                    if (!uploadCancelled) {
+                        showStatus(`✅ ${convertedCompanies.length}개 회사 데이터가 성공적으로 업로드되었습니다!`, 'success');
+                    }
+                } else {
+                    // 대관 데이터 업로드
+                    if (uploadMode === 'replace') {
+                        await clearCollection('reservations');
+                    }
+                    await uploadReservationInBatches(uploadMode, batchSize);
+                    
+                    if (!uploadCancelled) {
+                        showStatus(`✅ ${convertedReservations.length}개 대관 데이터가 성공적으로 업로드되었습니다!`, 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('업로드 오류:', error);
+                showStatus('업로드 중 오류가 발생했습니다: ' + error.message, 'error');
+            } finally {
+                showUploadProgress(false);
+            }
+        }
+
+        async function clearCollection(collectionName = 'company') {
+            updateProgress(0, `기존 ${collectionName} 데이터 삭제 중...`);
+            
+            const snapshot = await db.collection(collectionName).get();
+            const batches = [];
+            
+            let batch = db.batch();
+            let batchCount = 0;
+            
+            snapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+                batchCount++;
+                
+                if (batchCount === 500) {
+                    batches.push(batch);
+                    batch = db.batch();
+                    batchCount = 0;
+                }
+            });
+            
+            if (batchCount > 0) {
+                batches.push(batch);
+            }
+            
+            for (let i = 0; i < batches.length; i++) {
+                if (uploadCancelled) throw new Error('업로드가 취소되었습니다.');
+                await batches[i].commit();
+                updateProgress((i + 1) / batches.length * 20, `기존 데이터 삭제 중... (${i + 1}/${batches.length})`);
+            }
+        }
+
+        async function uploadCompanyInBatches(uploadMode, batchSize) {
+            const totalBatches = Math.ceil(convertedCompanies.length / batchSize);
+            
+            for (let i = 0; i < totalBatches; i++) {
+                if (uploadCancelled) throw new Error('업로드가 취소되었습니다.');
+                
+                const start = i * batchSize;
+                const end = Math.min(start + batchSize, convertedCompanies.length);
+                const batchData = convertedCompanies.slice(start, end);
+                
+                const batch = db.batch();
+                
+                for (const company of batchData) {
+                    if (uploadMode === 'merge') {
+                        // 기존 데이터 확인 후 병합
+                        const existingQuery = await db.collection('company')
+                            .where('companyName', '==', company.companyName)
+                            .where('companyRegNum', '==', company.companyRegNum)
+                            .get();
+                        
+                        if (!existingQuery.empty) {
+                            const existingDoc = existingQuery.docs[0];
+                            const existingData = existingDoc.data();
+                            
+                            // 담당자 병합
+                            const mergedPersons = [...new Set([
+                                ...(existingData.companyPerson || []),
+                                ...company.companyPerson
+                            ])];
+                            
+                            batch.update(existingDoc.ref, {
+                                ...company,
+                                companyPerson: mergedPersons
+                            });
+                        } else {
+                            batch.set(db.collection('company').doc(), company);
+                        }
+                    } else {
+                        // 새로 추가
+                        batch.set(db.collection('company').doc(), company);
+                    }
+                }
+                
+                await batch.commit();
+                
+                const baseProgress = uploadMode === 'replace' ? 20 : 0;
+                const uploadProgress = baseProgress + ((i + 1) / totalBatches) * (100 - baseProgress);
+                updateProgress(uploadProgress, `업로드 중... (${end}/${convertedCompanies.length})`);
+            }
+        }
+
+        async function uploadReservationInBatches(uploadMode, batchSize) {
+            const totalBatches = Math.ceil(convertedReservations.length / batchSize);
+            
+            for (let i = 0; i < totalBatches; i++) {
+                if (uploadCancelled) throw new Error('업로드가 취소되었습니다.');
+                
+                const start = i * batchSize;
+                const end = Math.min(start + batchSize, convertedReservations.length);
+                const batchData = convertedReservations.slice(start, end);
+                
+                const batch = db.batch();
+                
+                for (const reservation of batchData) {
+                    // 새 회사 생성이 필요한 경우
+                    if (reservation.newCompany) {
+                        // 먼저 회사 문서 생성
+                        const companyRef = db.collection('company').doc();
+                        batch.set(companyRef, reservation.newCompany);
+                        
+                        // 대관 데이터에서 newCompany 제거하고 companyRef 업데이트
+                        const cleanReservation = { ...reservation };
+                        delete cleanReservation.newCompany;
+                        cleanReservation.companyRef = companyRef.id;
+                        
+                        batch.set(db.collection('reservations').doc(), cleanReservation);
+                    } else {
+                        // 기존 회사 참조하는 경우 - Firestore Reference 객체로 변환
+                        const reservationToSave = { ...reservation };
+                        
+                        // companyRef를 실제 Firestore Reference로 변환
+                        if (reservationToSave.companyRef) {
+                            reservationToSave.companyRef = db.collection('company').doc(reservationToSave.companyRef);
+                        }
+                        
+                        batch.set(db.collection('reservations').doc(), reservationToSave);
+                    }
+                }
+                
+                await batch.commit();
+                
+                const baseProgress = uploadMode === 'replace' ? 20 : 0;
+                const uploadProgress = baseProgress + ((i + 1) / totalBatches) * (100 - baseProgress);
+                updateProgress(uploadProgress, `업로드 중... (${end}/${convertedReservations.length})`);
+            }
+        }
+
+        function showUploadProgress(show) {
+            const progressDiv = document.getElementById('uploadProgress');
+            const startBtn = document.getElementById('startUploadBtn');
+            const cancelBtn = document.getElementById('cancelUploadBtn');
+            
+            progressDiv.style.display = show ? 'block' : 'none';
+            startBtn.style.display = show ? 'none' : 'inline-block';
+            cancelBtn.style.display = show ? 'inline-block' : 'none';
+            
+            if (!show) {
+                updateProgress(0, '준비 중...');
+            }
+        }
+
+        function updateProgress(percent, text) {
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        function cancelUpload() {
+            uploadCancelled = true;
+            showUploadProgress(false);
+            showStatus('업로드가 취소되었습니다.', 'error');
+        }
+
+        // Firestore 다운로드 관련 함수들
+        function downloadFromFirestore() {
+            if (!db) {
+                showStatus('Firebase가 설정되지 않았습니다. Firebase 설정을 확인해주세요.', 'error');
+                return;
+            }
+            
+            document.getElementById('downloadSection').style.display = 'block';
+            document.getElementById('downloadSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function startDownload() {
+            if (!db) {
+                showStatus('Firebase가 설정되지 않았습니다.', 'error');
+                return;
+            }
+
+            const downloadFormat = document.getElementById('downloadFormat').value;
+            const fileFormat = document.getElementById('fileFormat').value;
+            const downloadFilter = document.getElementById('downloadFilter').value;
+            
+            downloadCancelled = false;
+            showDownloadProgress(true);
+            
+            try {
+                updateDownloadProgress(10, 'Firestore에서 데이터 조회 중...');
+                
+                let query = db.collection('company');
+                
+                // 필터 적용
+                if (downloadFilter === 'seoul') {
+                    query = query.where('isSeoul', '==', true);
+                } else if (downloadFilter === 'nonSeoul') {
+                    query = query.where('isSeoul', '==', false);
+                }
+                
+                const snapshot = await query.get();
+                
+                if (downloadCancelled) return;
+                
+                updateDownloadProgress(50, '데이터 처리 중...');
+                
+                const downloadedData = [];
+                let processed = 0;
+                
+                snapshot.docs.forEach(doc => {
+                    if (downloadCancelled) return;
+                    
+                    const data = doc.data();
+                    
+                    if (downloadFormat === 'withId') {
+                        downloadedData.push({
+                            documentId: doc.id,
+                            ...data
+                        });
+                    } else if (downloadFormat === 'withoutId') {
+                        downloadedData.push(data);
+                    } else if (downloadFormat === 'idOnly') {
+                        downloadedData.push({
+                            documentId: doc.id,
+                            companyName: data.companyName,
+                            companyRegNum: data.companyRegNum
+                        });
+                    }
+                    
+                    processed++;
+                    const progress = 50 + (processed / snapshot.size) * 40;
+                    updateDownloadProgress(progress, `데이터 처리 중... (${processed}/${snapshot.size})`);
+                });
+                
+                if (downloadCancelled) return;
+                
+                updateDownloadProgress(95, '파일 생성 중...');
+                
+                // 파일 형식에 따른 다운로드
+                if (fileFormat === 'excel') {
+                    downloadExcel(downloadedData, downloadFormat, downloadFilter);
+                } else {
+                    downloadJSON(downloadedData, downloadFormat, downloadFilter);
+                }
+                
+                updateDownloadProgress(100, '완료!');
+                
+                if (!downloadCancelled) {
+                    showStatus(`✅ ${downloadedData.length}개 회사 데이터가 성공적으로 다운로드되었습니다!`, 'success');
+                }
+                
+            } catch (error) {
+                console.error('다운로드 오류:', error);
+                showStatus('다운로드 중 오류가 발생했습니다: ' + error.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    showDownloadProgress(false);
+                }, 1000);
+            }
+        }
+
+        function downloadJSON(data, format, filter) {
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            
+            const filterSuffix = filter === 'all' ? '' : `_${filter}`;
+            const formatSuffix = format === 'withId' ? '_with_id' : 
+                               format === 'idOnly' ? '_id_only' : '';
+            link.download = `firestore_companies${filterSuffix}${formatSuffix}_${new Date().toISOString().split('T')[0]}.json`;
+            
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function downloadExcel(data, format, filter) {
+            // 엑셀용 데이터 변환
+            const excelData = data.map(item => {
+                const row = {};
+                
+                if (format === 'withId') {
+                    row['문서ID'] = item.documentId;
+                    row['회사명'] = item.companyName;
+                    row['사업자등록번호'] = item.companyRegNum;
+                    row['담당자명'] = Array.isArray(item.companyPerson) ? item.companyPerson.join(', ') : item.companyPerson;
+                    row['서울소재여부'] = item.isSeoul ? 'Y' : 'N';
+                } else if (format === 'withoutId') {
+                    row['회사명'] = item.companyName;
+                    row['사업자등록번호'] = item.companyRegNum;
+                    row['담당자명'] = Array.isArray(item.companyPerson) ? item.companyPerson.join(', ') : item.companyPerson;
+                    row['서울소재여부'] = item.isSeoul ? 'Y' : 'N';
+                } else if (format === 'idOnly') {
+                    row['문서ID'] = item.documentId;
+                    row['회사명'] = item.companyName;
+                    row['사업자등록번호'] = item.companyRegNum;
+                }
+                
+                return row;
+            });
+
+            // 워크북 생성
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            
+            // 컬럼 너비 자동 조정
+            const colWidths = [];
+            if (excelData.length > 0) {
+                Object.keys(excelData[0]).forEach((key, index) => {
+                    const maxLength = Math.max(
+                        key.length,
+                        ...excelData.map(row => String(row[key] || '').length)
+                    );
+                    colWidths[index] = { wch: Math.min(maxLength + 2, 50) };
+                });
+            }
+            ws['!cols'] = colWidths;
+            
+            // 시트 추가
+            XLSX.utils.book_append_sheet(wb, ws, '회사데이터');
+            
+            // 파일명 생성
+            const filterSuffix = filter === 'all' ? '' : `_${filter}`;
+            const formatSuffix = format === 'withId' ? '_with_id' : 
+                               format === 'idOnly' ? '_id_only' : '';
+            const filename = `firestore_companies${filterSuffix}${formatSuffix}_${new Date().toISOString().split('T')[0]}.xlsx`;
+            
+            // 다운로드
+            XLSX.writeFile(wb, filename);
+        }
+
+        function showDownloadProgress(show) {
+            const progressDiv = document.getElementById('downloadProgress');
+            const startBtn = document.getElementById('startDownloadBtn');
+            const cancelBtn = document.getElementById('cancelDownloadBtn');
+            
+            progressDiv.style.display = show ? 'block' : 'none';
+            startBtn.style.display = show ? 'none' : 'inline-block';
+            cancelBtn.style.display = show ? 'inline-block' : 'none';
+            
+            if (!show) {
+                updateDownloadProgress(0, '준비 중...');
+            }
+        }
+
+        function updateDownloadProgress(percent, text) {
+            document.getElementById('downloadProgressBar').style.width = percent + '%';
+            document.getElementById('downloadProgressText').textContent = text;
+        }
+
+        function cancelDownload() {
+            downloadCancelled = true;
+            showDownloadProgress(false);
+            showStatus('다운로드가 취소되었습니다.', 'error');
+        }
+
+        // Firebase 삭제 관련 함수들
+        function showDeleteSection() {
+            if (!db) {
+                showStatus('Firebase가 설정되지 않았습니다. Firebase 설정을 확인해주세요.', 'error');
+                return;
+            }
+            
+            document.getElementById('deleteSection').style.display = 'block';
+            document.getElementById('deleteSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function startDelete() {
+            if (!db) {
+                showStatus('Firebase가 설정되지 않았습니다.', 'error');
+                return;
+            }
+
+            const confirmText = document.getElementById('deleteConfirmText').value;
+            if (confirmText !== 'DELETE') {
+                showStatus('확인 텍스트를 정확히 입력해주세요: DELETE', 'error');
+                return;
+            }
+
+            const collection = document.getElementById('deleteCollection').value;
+            
+            deleteCancelled = false;
+            showDeleteProgress(true);
+            
+            try {
+                if (collection === 'both') {
+                    updateDeleteProgress(10, 'company 컬렉션 삭제 중...');
+                    await deleteCollection('company');
+                    
+                    if (deleteCancelled) return;
+                    
+                    updateDeleteProgress(60, 'reservations 컬렉션 삭제 중...');
+                    await deleteCollection('reservations');
+                } else {
+                    updateDeleteProgress(10, `${collection} 컬렉션 삭제 중...`);
+                    await deleteCollection(collection);
+                }
+                
+                updateDeleteProgress(100, '삭제 완료!');
+                
+                if (!deleteCancelled) {
+                    showStatus(`✅ ${collection === 'both' ? '모든 데이터' : collection + ' 데이터'}가 성공적으로 삭제되었습니다!`, 'success');
+                    document.getElementById('deleteConfirmText').value = '';
+                }
+                
+            } catch (error) {
+                console.error('삭제 오류:', error);
+                showStatus('삭제 중 오류가 발생했습니다: ' + error.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    showDeleteProgress(false);
+                }, 1000);
+            }
+        }
+
+        async function deleteCollection(collectionName) {
+            const snapshot = await db.collection(collectionName).get();
+            
+            if (snapshot.empty) {
+                console.log(`${collectionName} 컬렉션이 비어있습니다.`);
+                return;
+            }
+            
+            const batches = [];
+            let batch = db.batch();
+            let batchCount = 0;
+            
+            snapshot.docs.forEach(doc => {
+                batch.delete(doc.ref);
+                batchCount++;
+                
+                if (batchCount === 500) {
+                    batches.push(batch);
+                    batch = db.batch();
+                    batchCount = 0;
+                }
+            });
+            
+            if (batchCount > 0) {
+                batches.push(batch);
+            }
+            
+            for (let i = 0; i < batches.length; i++) {
+                if (deleteCancelled) throw new Error('삭제가 취소되었습니다.');
+                await batches[i].commit();
+                
+                const progress = ((i + 1) / batches.length) * 40;
+                updateDeleteProgress(
+                    collectionName === 'company' ? 10 + progress : 60 + progress, 
+                    `${collectionName} 삭제 중... (${i + 1}/${batches.length})`
+                );
+            }
+        }
+
+        function showDeleteProgress(show) {
+            const progressDiv = document.getElementById('deleteProgress');
+            const startBtn = document.getElementById('startDeleteBtn');
+            const cancelBtn = document.getElementById('cancelDeleteBtn');
+            
+            progressDiv.style.display = show ? 'block' : 'none';
+            startBtn.style.display = show ? 'none' : 'inline-block';
+            cancelBtn.style.display = show ? 'inline-block' : 'none';
+            
+            if (!show) {
+                updateDeleteProgress(0, '준비 중...');
+            }
+        }
+
+        function updateDeleteProgress(percent, text) {
+            document.getElementById('deleteProgressBar').style.width = percent + '%';
+            document.getElementById('deleteProgressText').textContent = text;
+        }
+
+        function cancelDelete() {
+            deleteCancelled = true;
+            showDeleteProgress(false);
+            showStatus('삭제가 취소되었습니다.', 'error');
+        }
+    </script>
+</body>
+</html>

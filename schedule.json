@@ -1,0 +1,425 @@
+[
+  {
+    "id": "schedule_001",
+    "date": "2025-05-02",
+    "studio": "스튜디오 메인",
+    "company": "모니칸",
+    "start": "18",
+    "end": "21",
+    "product": "스마트 모니터"
+  },
+  {
+    "id": "schedule_002",
+    "date": "2025-05-02",
+    "studio": "스튜디오 소형",
+    "company": "주식회사 커다란",
+    "start": "16",
+    "end": "18",
+    "product": "커다란 스피칭 컨텐츠 촬영"
+  },
+  {
+    "id": "schedule_003",
+    "date": "2025-05-02",
+    "studio": "스튜디오 소형",
+    "company": "이매진트리",
+    "start": "12",
+    "end": "16",
+    "product": "이매진트리 컨텐츠 제작"
+  },
+  {
+    "id": "schedule_004",
+    "date": "2025-05-07",
+    "studio": "스튜디오 메인",
+    "company": "애드낫컴퍼니",
+    "start": "18",
+    "end": "21",
+    "product": "반려동물 패션 아이템"
+  },
+  {
+    "id": "schedule_005",
+    "date": "2025-05-08",
+    "studio": "스튜디오 메인",
+    "company": "나이스카페인클럽",
+    "start": "10",
+    "end": "13",
+    "product": "매트리스"
+  },
+  {
+    "id": "schedule_006",
+    "date": "2025-05-08",
+    "studio": "스튜디오 메인",
+    "company": "엘리스앤클레어",
+    "start": "16",
+    "end": "21",
+    "product": "미니미IH 압력솥"
+  },
+  {
+    "id": "schedule_007",
+    "date": "2025-05-08",
+    "studio": "스튜디오 소형",
+    "company": "롱테일 주식회사",
+    "start": "15",
+    "end": "17",
+    "product": "외국어 강의 & 홍보영상"
+  },
+  {
+    "id": "schedule_008",
+    "date": "2025-05-09",
+    "studio": "스튜디오 메인",
+    "company": "애드낫컴퍼니",
+    "start": "10",
+    "end": "13",
+    "product": "드라이기"
+  },
+  {
+    "id": "schedule_009",
+    "date": "2025-05-09",
+    "studio": "스튜디오 메인",
+    "company": "나이스카페인클럽",
+    "start": "13",
+    "end": "16",
+    "product": "스마트모니터"
+  },
+  {
+    "id": "schedule_010",
+    "date": "2025-05-09",
+    "studio": "스튜디오 키친",
+    "company": "무라사키",
+    "start": "19",
+    "end": "21",
+    "product": "컨텐츠 제작"
+  },
+  {
+    "id": "schedule_011",
+    "date": "2025-05-12",
+    "studio": "스튜디오 메인",
+    "company": "나이스카페인클럽",
+    "start": "10",
+    "end": "13",
+    "product": "오파트라"
+  },
+  {
+    "id": "schedule_012",
+    "date": "2025-05-13",
+    "studio": "스튜디오 메인",
+    "company": "나이스카페인클럽",
+    "start": "9",
+    "end": "12",
+    "product": "아메리칸스탠다드"
+  },
+  {
+    "id": "schedule_013",
+    "date": "2025-05-13",
+    "studio": "스튜디오 메인",
+    "company": "모니칸",
+    "start": "13",
+    "end": "16",
+    "product": "TV"
+  },
+  {
+    "id": "schedule_014",
+    "date": "2025-05-13",
+    "studio": "스튜디오 메인",
+    "company": "애드낫컴퍼니",
+    "start": "17",
+    "end": "20",
+    "product": "아토케어"
+  },
+  {
+    "id": "schedule_015",
+    "date": "2025-05-14",
+    "studio": "스튜디오 메인",
+    "company": "와이케이지",
+    "start": "15",
+    "end": "18",
+    "product": "김치냉장고"
+  },
+  {
+    "id": "schedule_016",
+    "date": "2025-05-14",
+    "studio": "스튜디오 소형",
+    "company": "이매진트리",
+    "start": "18",
+    "end": "21",
+    "product": "이매진트리 컨텐츠 제작"
+  },
+  {
+    "id": "schedule_017",
+    "date": "2025-05-15",
+    "studio": "스튜디오 메인",
+    "company": "나이스카페인클럽",
+    "start": "18",
+    "end": "21",
+    "product": "티리난지"
+  },
+  {
+    "id": "schedule_018",
+    "date": "2025-05-16",
+    "studio": "스튜디오 메인",
+    "company": "모니칸",
+    "start": "13",
+    "end": "16",
+    "product": "스마트 모니터"
+  },
+  {
+    "id": "schedule_019",
+    "date": "2025-05-16",
+    "studio": "스튜디오 소형",
+    "company": "이매진트리",
+    "start": "13",
+    "end": "15",
+    "product": "이매진트리 컨텐츠 제작"
+  },
+  {
+    "id": "schedule_020",
+    "date": "2025-05-16",
+    "studio": "스튜디오 소형",
+    "company": "이매진트리",
+    "start": "18",
+    "end": "20",
+    "product": "이매진트리 컨텐츠 제작"
+  },
+  {
+    "id": "schedule_021",
+    "date": "2025-05-20",
+    "studio": "스튜디오 메인",
+    "company": "와이케이지",
+    "start": "10",
+    "end": "15",
+    "product": "에어컨/김치냉장고"
+  },
+  {
+    "id": "schedule_022",
+    "date": "2025-05-21",
+    "studio": "스튜디오 소형",
+    "company": "정지윤",
+    "start": "13",
+    "end": "14",
+    "product": "자석 속눈썹"
+  },
+  {
+    "id": "schedule_023",
+    "date": "2025-05-21",
+    "studio": "스튜디오 메인",
+    "company": "애드낫컴퍼니",
+    "start": "13",
+    "end": "16",
+    "product": "스마트 모니터"
+  },
+  {
+    "id": "schedule_024",
+    "date": "2025-05-21",
+    "studio": "스튜디오 메인",
+    "company": "모니칸",
+    "start": "18",
+    "end": "21",
+    "product": "스마트 모니터"
+  },
+  {
+    "id": "schedule_025",
+    "date": "2025-05-21",
+    "studio": "스튜디오 키친",
+    "company": "듀플레이어",
+    "start": "13",
+    "end": "18",
+    "product": "핑크캔디봇"
+  },
+  {
+    "id": "schedule_026",
+    "date": "2025-05-22",
+    "studio": "스튜디오 메인",
+    "company": "애드낫컴퍼니",
+    "start": "9",
+    "end": "12",
+    "product": "에스알피"
+  },
+  {
+    "id": "schedule_027",
+    "date": "2025-05-22",
+    "studio": "스튜디오 메인",
+    "company": "모니칸",
+    "start": "13",
+    "end": "16",
+    "product": "스마트 모니터"
+  },
+  {
+    "id": "schedule_028",
+    "date": "2025-05-22",
+    "studio": "스튜디오 메인",
+    "company": "나이스카페인클럽",
+    "start": "18",
+    "end": "21",
+    "product": "드라이기"
+  },
+  {
+    "id": "schedule_029",
+    "date": "2025-05-22",
+    "studio": "스튜디오 키친",
+    "company": "메타텍스쳐",
+    "start": "13",
+    "end": "18",
+    "product": "ALOKEGG"
+  },
+  {
+    "id": "schedule_030",
+    "date": "2025-05-23",
+    "studio": "스튜디오 메인",
+    "company": "나이스카페인클럽",
+    "start": "13",
+    "end": "16",
+    "product": "스마트모니터"
+  },
+  {
+    "id": "schedule_031",
+    "date": "2025-05-23",
+    "studio": "스튜디오 메인",
+    "company": "안소정(쇼플루언서)",
+    "start": "16",
+    "end": "18",
+    "product": "헬리오드, 더하이웨이"
+  },
+  {
+    "id": "schedule_032",
+    "date": "2025-05-23",
+    "studio": "스튜디오 메인",
+    "company": "와이케이지",
+    "start": "18",
+    "end": "20",
+    "product": "김치냉장고"
+  },
+  {
+    "id": "schedule_033",
+    "date": "2025-05-23",
+    "studio": "스튜디오 소형",
+    "company": "진짜준국어",
+    "start": "11",
+    "end": "13",
+    "product": "외국어 강의 & 홍보영상"
+  },
+  {
+    "id": "schedule_034",
+    "date": "2025-05-23",
+    "studio": "스튜디오 소형",
+    "company": "와이케이지",
+    "start": "15",
+    "end": "18",
+    "product": "LG 김치냉장고"
+  },
+  {
+    "id": "schedule_035",
+    "date": "2025-05-23",
+    "studio": "스튜디오 소형",
+    "company": "이매진트리",
+    "start": "18",
+    "end": "20",
+    "product": "이매진트리 컨텐츠 제작"
+  },
+  {
+    "id": "schedule_036",
+    "date": "2025-05-23",
+    "studio": "스튜디오 키친",
+    "company": "무라사키",
+    "start": "19",
+    "end": "21",
+    "product": "컨텐츠 제작"
+  },
+  {
+    "id": "schedule_037",
+    "date": "2025-05-26",
+    "studio": "스튜디오 메인",
+    "company": "애드낫컴퍼니",
+    "start": "13",
+    "end": "15",
+    "product": "스마트모니터"
+  },
+  {
+    "id": "schedule_038",
+    "date": "2025-05-26",
+    "studio": "스튜디오 메인",
+    "company": "나이스카페인클럽",
+    "start": "18",
+    "end": "21",
+    "product": "쿼드세라"
+  },
+  {
+    "id": "schedule_039",
+    "date": "2025-05-27",
+    "studio": "스튜디오 메인",
+    "company": "애드낫컴퍼니",
+    "start": "10",
+    "end": "12",
+    "product": "스포홀릭"
+  },
+  {
+    "id": "schedule_040",
+    "date": "2025-05-27",
+    "studio": "스튜디오 메인",
+    "company": "애드낫컴퍼니",
+    "start": "13",
+    "end": "16",
+    "product": "스마트 모니터"
+  },
+  {
+    "id": "schedule_041",
+    "date": "2025-05-27",
+    "studio": "스튜디오 키친",
+    "company": "온에어365라이브",
+    "start": "17",
+    "end": "21",
+    "product": "엘리스앤클레어"
+  },
+  {
+    "id": "schedule_042",
+    "date": "2025-05-27",
+    "studio": "스튜디오 메인",
+    "company": "모니칸",
+    "start": "18",
+    "end": "21",
+    "product": "스마트 모니터"
+  },
+  {
+    "id": "schedule_043",
+    "date": "2025-06-20",
+    "studio": "스튜디오 키친",
+    "company": "온에어365라이브",
+    "start": "17",
+    "end": "21",
+    "product": "엘리스앤클레어"
+  },
+  {
+    "id": "schedule_044",
+    "date": "2025-06-23",
+    "studio": "스튜디오 메인",
+    "company": "온에어365라이브",
+    "start": "17",
+    "end": "21",
+    "product": "엘리스앤클레어"
+  },
+  {
+    "id": "schedule_045",
+    "date": "2025-06-23",
+    "studio": "스튜디오 키친",
+    "company": "온에어365라이브",
+    "start": "17",
+    "end": "21",
+    "product": "엘리스앤클레어"
+  },
+  {
+    "id": "schedule_046",
+    "date": "2025-06-23",
+    "studio": "스튜디오 소형",
+    "company": "온에어365라이브",
+    "start": "17",
+    "end": "21",
+    "product": "엘리스앤클레어"
+  },
+  {
+    "id": "schedule_047",
+    "date": "2025-06-23",
+    "studio": "스튜디오 키친",
+    "company": "온에어365라이브",
+    "start": "11",
+    "end": "13",
+    "product": "엘리스앤클레어"
+  }
+]
